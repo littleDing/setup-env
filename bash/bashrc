@@ -1,0 +1,51 @@
+alias lds1='screen -D -RR dingding01'
+alias lds2='screen -D -RR dingding02'
+alias lds3='screen -D -RR dingding03'
+alias lds4='screen -D -RR dingding04'
+alias lds5='screen -D -RR dingding05'
+alias lds7='screen -D -RR dingding05'
+alias lds8='screen -D -RR dingding05'
+alias lds9='screen -D -RR dingding05'
+
+function ldkillall(){
+local pid=$1
+local sids=`ps -ef | awk '$3=='$pid'{print $2}'`
+  echo killing $pid
+    kill $pid
+    for sid in $sids ; do
+        ldkillall $sid
+    done
+}
+function columns(){
+local sep=$1
+[ "x$sep" == x ] && sep=" "
+  awk 'BEGIN{FS=OFS="'"$sep"'"}{print NF}'
+}
+function sum(){
+local sep=$1
+local div=$2
+[ "x$sep" == x ] && sep=" "
+[ "x$div" == x ] && div=0
+  awk 'BEGIN{
+    FS=OFS="'"$sep"'"
+    max_col=0
+    cnt=0
+  }{
+    for(i=1;i<=NF;++i) {
+      s[i] += $i
+      if(i>max_col) {
+        max_col=i
+      }
+    }
+    cnt += 1
+  }END{
+    for(i=1;i<=max_col;++i) {
+      if('$div'==0) {
+        printf(s[i]"'"$sep"'");
+      } else {
+        printf(s[i]/cnt"'"$sep"'");
+      }
+    }
+    printf(cnt"\n");
+  }'
+}

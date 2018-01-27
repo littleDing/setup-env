@@ -1,0 +1,156 @@
+set wildmenu " vim自身命令行模式智能补全
+set ruler " 在右下角显示光标当前位置信息
+set tabstop=2 " 设置制表符占用空格数
+set shiftwidth=2
+set softtabstop=2
+set smartindent
+set autoindent
+set ai " 自动缩进
+set expandtab " 空格代替tab
+set number " 行号显示
+set hlsearch " 高亮显示结果
+set showcmd " 在命令行显示当前输入的命令
+set wrap " 打开折行
+set completeopt=longest,menu " 取消补全内容以分割子窗口形式出现，只显示补全列表
+set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,sjis,euc-kr,ucs-2le,latin1 "字符编码检测
+set textwidth=0 " 关闭自动换行
+syntax enable " 开启语法高亮功能
+syntax on " 允许用指定语法高亮配色方案替换默认方案
+filetype on " 开启文件类型侦测
+filetype plugin on " 根据侦测到的不同类型加载对应的插件
+
+" ####### 插件相关设置 #######
+"设置子窗口的宽度
+let Tlist_WinWidth=30
+let NERDTreeWinSize=30
+"设置tablist插件只显示当前编辑文件的tag内容，而非当前所有打开文件的tag内容
+let Tlist_Show_One_File=1
+" 设置omni-cpp-complete显示函数原型
+let OmniCpp_ShowPrototypeInAbbr = 1
+
+" ####### 定义快捷键 #######
+let mapleader=";" " 定义快捷键的前缀，即<Leader>
+" 设置快捷键将选中文本块复制至系统剪贴板
+vnoremap <Leader>y "+y
+" 设置快捷键将系统剪贴板内容粘贴至vim
+nmap <Leader>p "+p
+"设置显示标签列表子窗口的快捷键。速记：taglist
+nnoremap<Leader>tl :TlistToggle<CR>
+" 使用NERDTree插件查看工程文件。设置快捷键，速记：file list
+nmap <Leader>fl :NERDTreeToggle<CR>
+" 使用new-omni-completion插件智能补全代码。该插件默认使用CTRL-X CTRL-O补全函数名或变量名，自定义快捷键为TAB
+imap <Leader><TAB> <C-X><C-O>
+" ctag 的快捷键
+map <F7> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q --languages=c++ .<CR>
+" tag 跳转的快捷键
+nmap <Leader>n :tn<CR>
+nmap <Leader>m :tp<CR>
+nmap <Leader>l :tselect<CR>
+" map <F10> <ESC><ESC>O<ESC><ESC>:read !date<CR>
+nmap log <ESC><ESC>O* [ <ESC>:read !date +\%Y-\%m-\%d\ \%H:\%M:\%S<CR>^^<esc>i<backspace><esc>$a ] 
+
+" ####### 函数定义 #######
+" vim 高亮显示 glog 行
+function SetLogHighLight()
+    highlight LogFatal ctermbg=red guifg=red
+    highlight LogError ctermfg=red guifg=red
+    highlight LogWarning ctermfg=yellow guifg=yellow
+    highlight LogInfo ctermfg=green guifg=green
+    syntax match LogFatal "^F\d\+ .*$"
+    syntax match LogError "^E\d\+ .*$"
+    syntax match LogWarning "^W\d\+ .*$"
+    "syntax match LogInfo "^I\d\+ .*$"
+    syntax match LogInfo "^I[^\]]*\]"
+endfunction
+autocmd BufEnter *.log.INFO.* call SetLogHighLight()
+autocmd BufEnter *.INFO call SetLogHighLight()
+autocmd BufEnter *.log.WARNING.* call SetLogHighLight()
+autocmd BufEnter *.WARNING call SetLogHighLight()
+autocmd BufEnter *.log.ERROR.* call SetLogHighLight()
+autocmd BufEnter *.ERROR call SetLogHighLight()
+autocmd BufEnter *.log.FATAL.* call SetLogHighLight()
+autocmd BufEnter *.FATAL call SetLogHighLight()
+
+" 设置 BUILD 文件的 filetype 为 python 文件
+autocmd BufEnter BUILD set filetype=python
+" 设置 protobuffer 文件语法解析
+augroup filetype
+  au! BufRead,BufNewFile *.proto setfiletype proto
+augroup end
+
+" 默认加载了 a.vim
+" 可以通过 :A 命令在对应的 .cc 和 .h 文件之间切换
+
+" 在退出插入模式时，自动关闭 fcitx 输入法
+let g:input_toggle = 1
+function! Fcitx2en()
+  let s:input_status = system("fcitx-remote")
+  if s:input_status == 2
+    let g:input_toggle = 1
+    let l:a = system("fcitx-remote -c")
+  endif
+endfunction
+function! Fcitx2zh()
+  let s:input_status = system("fcitx-remote")
+  if s:input_status != 2 && g:input_toggle == 1
+    let l:a = system("fcitx-remote -o")
+    let g:input_toggle = 0
+  endif
+endfunction
+set ttimeoutlen=0
+autocmd InsertLeave * call Fcitx2en()
+
+" 查找 codebase 根目录
+" 若找到，则设置文件搜索路径和 make 指令
+functio! FindProjectRootDir()
+    let rootfile = findfile("BLADE_ROOT", ".;")
+    " in project root dir
+    if rootfile == "BLADE_ROOT"
+        return "."
+    endif
+    return substitute(rootfile, "/BLADE_ROOT$", "", "")
+endfunction
+function! AutoSetPath()
+  if exists("b:did_auto_set_path")
+    return
+  endif
+  let b:did_auto_set_path = 1
+
+  let l:project_root = FindProjectRootDir()
+  if l:project_root != ""
+    if l:project_root == "."
+      exec "set path+=" . getcwd() . "/.build/pb/c++"
+    else
+      exec "set path+=" . project_root
+      exec "set path+=" . project_root . "/.build/pb/c++"
+    endif
+
+    " 当前目录已经有 makefile 了，则以当前目录为准，不进行特殊设置
+    if filereadable("./Makefile") || filereadable("./makefile")
+      return
+    endif
+
+    exec "set makeprg=make\\ -C\\ " . project_root
+  endif
+endfunction
+call AutoSetPath()
+
+" 支持在 tsan 的日志里，光标移动到源码文件名上，用 ;g 快速打开源文件,并高亮显示出错行
+function! Gfw()
+  py import vim
+  py if len(vim.windows) == 1: vim.command("split")
+
+  let b = bufnr('')
+  normal mz
+  let b = bufnr('')
+  wincmd w
+  exe "b " . b
+  normal `zgF
+  set cursorline
+  wincmd w
+endfun
+nnoremap ;g :call Gfw()<cr>
+
+if filereadable(expand('~/.vim_local'))
+  source ~/.vim_local
+endif
