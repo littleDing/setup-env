@@ -1,3 +1,6 @@
 bunzip2
 git
 openssl-devel
+screen
+ack
+telnet

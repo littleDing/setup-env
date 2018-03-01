@@ -154,3 +154,35 @@ nnoremap ;g :call Gfw()<cr>
 if filereadable(expand('~/.vim_local'))
   source ~/.vim_local
 endif
+
+
+autocmd BufNewFile *.py exec ":call Setfilehead()"
+func Setfilehead()
+    call append(0, '# -*- encoding=utf8')
+    call append(1, '#')
+    call append(2, '#      Filename: '.expand("%"))
+    call append(3, '#')
+    call append(4, '#        Author: littleding - waigi.ding@gmail.com')
+    call append(5, '#   Description: ---')
+    call append(6, '#        Create: '.strftime("%Y-%m-%d %H:%M:%S"))
+    call append(7, '# Last Modified: '.strftime("%Y-%m-%d %H:%M:%S"))
+    call append(9, 'import logging')
+    call append(10, 'import unittest')
+    call append(11, '')
+    call append(12, '')
+    call append(13, '')
+    call append(14, '')
+    call append(15, '')
+    call append(16, 'def main():')
+    call append(17, '  import pandas as pd')
+    call append(18, '  pd.set_option("display.width", 1200)')
+    call append(19, '  logging.basicConfig(level=logging.INFO,format="%(asctime)s T%(thread)d %(funcName)s@%(filename)s#%(lineno)d %(levelname)s %(message)s")')
+    call append(20, '  unittest.main()')
+    call append(21, '')
+    call append(22, '')
+    call append(23, '')
+    call append(24, 'if __name__ == "__main__":')
+    call append(25, '  main()')
+endfunc
+
+
