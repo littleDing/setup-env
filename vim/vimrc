@@ -215,9 +215,29 @@ func SetPyfilehead()
     call append(28, '  unittest.main()')
 endfunc
 
+func SetCppHfilehead()
+    call append(0, '//      Filename: '.expand("%"))
+    call append(1, '//')
+    call append(2, '//        Author: littleding - waigi.ding@gmail.com')
+    call append(3, '//   Description: ---')
+    call append(4, '//        Create: '.strftime("%Y-%m-%d %H:%M:%S"))
+    call append(5, '')
+    call append(6, '#pragma once')
+    call append(7, '')
+    call append(8, '')
+endfunc
 
-
-
+func SetCppCCfilehead()
+    call append(0, '//      Filename: '.expand("%"))
+    call append(1, '//')
+    call append(2, '//        Author: littleding - waigi.ding@gmail.com')
+    call append(3, '//   Description: ---')
+    call append(4, '//        Create: '.strftime("%Y-%m-%d %H:%M:%S"))
+    call append(5, '')
+    call append(6, '#include ""')
+    call append(7, '')
+    call append(8, '')
+endfunc
 
 func DateInsert()
     call setline(8, '# Last modified: '. strftime("%Y-%m-%d %H:%M:%S"))
@@ -225,3 +245,5 @@ endfunc
 
 autocmd BufNewFile *.py exec ":call Setfilehead()"
 autocmd FileWritePre,BufWritePre *.py exec ":call DateInsert()"
+autocmd BufNewFile *.h exec ":call SetCppHfilehead()"
+autocmd BufNewFile *.cc exec ":call SetCppCCfilehead()"
