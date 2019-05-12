@@ -1,0 +1,2 @@
+tensorflow_gpu==1.13.2
+tensor2tensor==1.13.4
